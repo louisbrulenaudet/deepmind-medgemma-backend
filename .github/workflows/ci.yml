@@ -27,7 +27,7 @@ jobs:
         run: |
           uv venv
           uv pip install --upgrade pip
-          uv pip install -r pyproject.toml --all-extras
+          uv pip install .
           uv sync
 
       - name: Run tests
