@@ -2,6 +2,10 @@ dev: ## Start development server
 	@echo "🚀 Starting development server..."
 	uv run fastapi dev
 
+test: ## Run tests
+	@echo "🧪 Running tests..."
+	pytest tests/test_app_startup.py
+
 init: ## Initialize development environment
 	@echo "🚀 Initializing project..."
 	@if [ -d ".venv" ]; then rm -rf .venv; fi
