@@ -1,15 +1,13 @@
 [project]
 name = "medgemma-backend"
-package = false
 version = "0.1.0"
 description = "Hackaton Google : Solve for Healthcare & Life Sciences with Gemma"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 readme = "README.md"
 keywords = ["biology", "chemistry", "openai", "llm", "deep learning", "data analysis", "image-processing", "text-processing", "information-retrieval", "image-analysis", "data-science", "data-engineering", "data-visualization", "data-mining", "data-cleaning", "data-preprocessing", "data-wrangling", "data-integration", "data-transformation", "data-modeling", "data-analytics", "data-pipelines", "image-generation", "agentic-ai", "llm-agents", "llm-automation", "llm-analytics", "llm-data-processing", "llm-data-analysis", "llm-data-engineering", "llm-data-science", "llm-data-mining", "llm-data-cleaning", "llm-data-preprocessing", "llm-data-wrangling", "llm-data-integration", "llm-data-transformation", "llm-data-modeling", "llm-data-visualization"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science and Research",
-    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
@@ -35,6 +33,9 @@ dependencies = [
     "google-genai>=1.24.0",
     "vertexai>=1.71.1",
     "duckduckgo-search>=8.0.5",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-asyncio>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -101,6 +102,9 @@ line-ending = "auto"
 
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
+
+[tool.setuptools]
+packages = ["app"]
 
 [tool.coverage.run]
 branch = true
