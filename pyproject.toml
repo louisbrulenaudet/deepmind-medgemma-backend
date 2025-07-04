@@ -1,6 +1,5 @@
 [project]
 name = "medgemma-backend"
-package = false
 version = "0.1.0"
 description = "Hackaton Google : Solve for Healthcare & Life Sciences with Gemma"
 license = {text = "Apache-2.0"}
