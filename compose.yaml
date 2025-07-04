@@ -1,0 +1,24 @@
+services:
+  app:
+    container_name: medgemma-hackathon-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8688", "--reload"]
+    ports:
+      - "80:8688"
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis_data:
