@@ -36,5 +36,4 @@ async def completion(file: UploadFile = File(...)) -> dict:
     ]:
         raise HTTPException(status_code=400, detail="Image format not supported.")
 
-
     return {"data": "Placeholder for completion response"}
