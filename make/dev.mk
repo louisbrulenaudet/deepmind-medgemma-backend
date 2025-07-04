@@ -4,7 +4,7 @@ dev: ## Start development server
 
 test: ## Run tests
 	@echo "🧪 Running tests..."
-	pytest tests/test_app_startup.py
+	uv run pytest
 
 init: ## Initialize development environment
 	@echo "🚀 Initializing project..."
