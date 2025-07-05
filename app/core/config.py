@@ -27,6 +27,7 @@ class Settings(BaseSettings):
         default="", alias="GOOGLE_CLOUD_PROJECT"
     )
     google_cse_id: str = Field(default="", alias="GOOGLE_CSE_ID")
+    google_cloud_project: str = Field(default="", alias="GOOGLE_CLOUD_PROJECT")
     google_default_model: str = "gemma-3-27b-it"
     static_files_dir: str = Field(default="static", alias="STATIC_FILES_DIR")
     embedding_device: str = Field(default="cpu", alias="EMBEDDING_DEVICE")
@@ -39,7 +40,9 @@ class Settings(BaseSettings):
             path="chromadb", settings=ChromadbSettings(anonymized_telemetry=False)
         )
 
-        print("ChromaDB client initialized successfully. Downloading embedding model...")  # noqa: T201
+        print(  # noqa: T201
+            "ChromaDB client initialized successfully. Downloading embedding model..."
+        )
 
         sentence_transformer_ef = (
             embedding_functions.SentenceTransformerEmbeddingFunction(

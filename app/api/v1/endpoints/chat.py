@@ -1,13 +1,14 @@
-import time
 import json
 import logging
+import time
+
 from fastapi import APIRouter, HTTPException, Request
 from starlette.responses import JSONResponse
 
 from app.core.api_request import api_request
 from app.core.config import settings
+from app.models.gemma import Content, GemmaPayload, Part
 from app.models.main_chat import ChatInput, MultimodalInput
-from app.models.gemma import GemmaPayload, Content, Part
 
 router = APIRouter(tags=["sync"])
 
@@ -26,11 +27,10 @@ async def ping() -> dict:
     }
 
 
-
 @router.post("/chat")
 async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
     logging.info(f"Received request with body: {await request.json()}")
-    with open("app/assets/patient.json", "r") as f:
+    with open("app/assets/patient.json") as f:
         previous_medical_file = json.load(f)
 
     conversation = input_data.conversation
