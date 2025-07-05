@@ -15,4 +15,4 @@ router = APIRouter(tags=["sync"])
 )
 @cached(ttl=60)
 async def completion(request: ClinicalTrialRequest) -> dict:
-    return {"data": "Placeholder for completion response"}
+    return {"data": request.query}
