@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     google_api_default_method: str = "generateContent"
     google_default_model: str = "gemini-1.5-flash-latest"
     static_files_dir: str = Field(default="static", alias="STATIC_FILES_DIR")
+    embedding_device: str = Field(default="cpu", alias="EMBEDDING_DEVICE")
     chroma_client: None = None
     chroma_collection: None = None
 
@@ -39,7 +40,7 @@ class Settings(BaseSettings):
         sentence_transformer_ef = (
             embedding_functions.SentenceTransformerEmbeddingFunction(
                 model_name="thomas-sounack/BioClinical-ModernBERT-base",
-                device="mps",
+                device=self.embedding_device,
                 trust_remote_code=True,
             )
         )
