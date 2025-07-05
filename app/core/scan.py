@@ -1,10 +1,13 @@
 import json
 from fastapi import HTTPException
 import binascii
+from pydantic import ValidationError
 
 from app.core.api_request import api_request
 from app.models.gemma import GemmaPayload
+from app.models.scan import PatientRecord
 from app.utils.image_processing import pad_base64_string
+from app.utils.json_utils import deep_merge
 
 
 async def process_scan(image_base64: str) -> dict:
@@ -21,11 +24,22 @@ async def process_scan(image_base64: str) -> dict:
             patient_data = json.load(f)
 
         prompt = f"""
-        Analyze the attached image and update the patient's information based on any new details found.
+        Analyze the attached image and extract any new or updated information for the patient.
         The current patient data is:
         {json.dumps(patient_data, indent=4)}
 
-        Return ONLY the updated JSON object, without any additional text, comments, or markdown formatting.
+        Return ONLY a JSON object containing the new or updated fields, without any additional text, comments, or markdown formatting.
+        For example, if you find a new lab result, return:
+        {{
+            "lab_results": [
+                {{
+                    "date": "YYYY-MM-DD",
+                    "sodium_mmol_per_L": 140,
+                    "potassium_mmol_per_L": 4.1,
+                    "creatinine_umol_per_L": 90
+                }}
+            ]
+        }}
         """
 
         payload_dict = {
@@ -58,17 +72,24 @@ async def process_scan(image_base64: str) -> dict:
         updated_patient_data_str = updated_patient_data_str.strip()
         
         try:
-            updated_patient_data = json.loads(updated_patient_data_str)
+            new_data = json.loads(updated_patient_data_str)
+            merged_data = deep_merge(patient_data, new_data)
+            patient_record = PatientRecord.parse_obj(merged_data)
         except json.JSONDecodeError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to decode JSON from model response: {updated_patient_data_str}",
             )
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid data structure after merging: {e}",
+            )
 
         with open("app/assets/patient.json", "w") as f:
-            json.dump(updated_patient_data, f, indent=4)
+            json.dump(patient_record.dict(), f, indent=4)
 
-        return updated_patient_data
+        return patient_record.dict()
 
     except binascii.Error:
         raise HTTPException(status_code=400, detail="Invalid base64 string.")
