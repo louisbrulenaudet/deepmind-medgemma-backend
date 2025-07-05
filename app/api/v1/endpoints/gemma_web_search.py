@@ -1,9 +1,9 @@
-import httpx
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from app.models.gemma import GemmaPayload, Content, Part
 from app.core.api_request import api_request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
+from app.core.web_scraper import webscraper
 
 router = APIRouter(tags=["gemma-web-search"])
 
@@ -12,10 +12,10 @@ class GemmaWebSearchRequest(BaseModel):
     context: str
 
 @router.post("/gemma-web-search")
-async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request) -> JSONResponse:
+async def gemma_web_search(request: GemmaWebSearchRequest) -> JSONResponse:
     """
     Take a prompt and context, generate a search query with Gemma,
-    and then call the /webscraper endpoint to perform a web search and scrape the results.
+    and then call the webscraper function to perform a web search and scrape the results.
     """
     # 1. Generate search query with Gemma
     gemma_prompt = f"Based on the following prompt and context, generate a concise and effective web search query. The query should be no more than 10 words. Return only the search query and nothing else.\n\nPrompt: {request.prompt}\n\nContext: {request.context}"
@@ -42,21 +42,15 @@ async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating search query with Gemma: {e}")
 
-    # 2. Call the /webscraper endpoint
-    async with httpx.AsyncClient() as client:
-        webscraper_url = http_request.url_for("webscraper")
-        try:
-            response = await client.post(str(webscraper_url), json={"query": search_query})
-            response.raise_for_status()
-            webscraper_data = response.json()
-            
-            # Add the search query to the final response
-            final_response = {
-                "search_query": search_query,
-                "data": webscraper_data.get("data", [])
-            }
-            return JSONResponse(content=final_response)
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=f"Error from webscraper service: {e.response.text}")
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=500, detail=f"Could not connect to webscraper service: {e}")
+    # 2. Call the webscraper function
+    try:
+        webscraper_data = await webscraper(search_query)
+        
+        # Add the search query to the final response
+        final_response = {
+            "search_query": search_query,
+            "data": webscraper_data.get("data", [])
+        }
+        return JSONResponse(content=final_response)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during web scraping: {e}")
