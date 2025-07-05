@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     )
     google_api_default_method: str = "generateContent"
     google_default_model: str = "gemini-1.5-flash-latest"
+    static_files_dir: str = Field(default="static", alias="STATIC_FILES_DIR")
 
     model_config = SettingsConfigDict(env_file=".env")
 

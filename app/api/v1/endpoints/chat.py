@@ -1,4 +1,4 @@
-import re
+import os
 import time
 
 from fastapi import APIRouter, HTTPException
@@ -27,8 +27,12 @@ async def ping() -> dict:
 
 @router.get("/{path:path}")
 async def send_static(path: str) -> FileResponse:
+    base_path = os.path.abspath(settings.static_files_dir)
+    full_path = os.path.abspath(os.path.normpath(os.path.join(base_path, path)))
+    if os.path.commonpath([base_path, full_path]) != base_path:
+        raise HTTPException(status_code=404, detail="File not found")
     try:
-        return FileResponse(path)
+        return FileResponse(full_path)
     except RuntimeError as e:
         raise HTTPException(status_code=404, detail="File not found") from e
 
@@ -129,9 +133,11 @@ Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
         file_type = file.get("type", "")
         base64_data = file.get("base64", "")
 
-        if match := re.match(r"^data:(.*?);base64,(.*)$", base64_data):
-            file_type = match.group(1)
-            base64_data = match.group(2)
+        if base64_data.startswith("data:") and ";base64," in base64_data:
+            header, base64_str = base64_data.split(",", 1)
+            mime_type = header[5 : header.find(";base64")]
+            file_type = mime_type
+            base64_data = base64_str
 
         if not file_type or not base64_data:
             continue

@@ -9,7 +9,9 @@ __all__ = [
 ]
 
 
-async def api_request(payload: object, model: str | None = None, method: str | None = None) -> dict[str, Any]:
+async def api_request(
+    payload: object, model: str | None = None, method: str | None = None
+) -> dict[str, Any]:
     response = {
         "status": "success",
         "error_message": "",
