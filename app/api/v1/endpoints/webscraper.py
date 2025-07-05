@@ -1,13 +1,12 @@
 import asyncio
 from fastapi import APIRouter
-from app.models.websearch import WebSearchRequest
-from app.utils.web_search import search
-from app.core.web_scraper import scrape_url
+from app.models.webscraper import WebScraperRequest
+from app.core.web_scraper import search, scrape_url
 
 router = APIRouter(tags=["web-scraper"])
 
 @router.post("/webscraper")
-async def webscraper(request: WebSearchRequest) -> dict:
+async def webscraper(request: WebScraperRequest) -> dict:
     """
     Perform a web search and scrape the content of the search results.
     """

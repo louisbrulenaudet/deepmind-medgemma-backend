@@ -1,5 +1,22 @@
 import httpx
 from bs4 import BeautifulSoup
+from app.core.config import settings
+
+async def search(query: str) -> list[dict]:
+    """
+    Search the web for a query.
+    """
+    url = "https://www.googleapis.com/customsearch/v1"
+    params = {
+        "key": settings.api_key,
+        "cx": settings.google_cse_id,
+        "q": query,
+        "num": 5,
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+        return response.json().get("items", [])
 
 async def scrape_url(url: str) -> str:
     """

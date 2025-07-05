@@ -11,10 +11,10 @@ from app.models.gemma import Content, GemmaPayload, Part
 from app.models.main_chat import ChatInput, MultimodalInput
 from app.models.gemma import GemmaPayload, Content, Part
 from app.core.llm_router import classify_request
-from app.api.v1.endpoints.websearch import websearch
+from app.api.v1.endpoints.gemma_web_search import gemma_web_search
 from app.api.v1.endpoints.clinical_trial_router import completion as clinical_trials
-from app.models.websearch import WebSearchRequest
 from app.models.clinical_trial import ClinicalTrialRequest
+from app.api.v1.endpoints.gemma_web_search import GemmaWebSearchRequest
 
 
 router = APIRouter(tags=["sync"])
@@ -98,7 +98,10 @@ async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
         return await clinical_trials(ClinicalTrialRequest(query=user_input))
     elif route == "web_search":
         logging.info(f"Routing to web_search")
-        return await websearch(WebSearchRequest(query=user_input))
+        # Extract context from the conversation
+        context = " ".join([entry["message"] for entry in input_data.conversation[:-1]])
+        gemma_request = GemmaWebSearchRequest(prompt=user_input, context=context)
+        return await gemma_web_search(gemma_request, request)
     else:
         raise HTTPException(status_code=500, detail="Invalid route")
 
