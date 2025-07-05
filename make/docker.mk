@@ -1,4 +1,4 @@
-check-docker: ## Verify Docker installation and configuration
+make check-docker: ## Verify Docker installation and configuration
 	@if ! command -v docker >/dev/null 2>&1; then \
 		echo "❌ Docker is not installed! Please install it first."; \
 		exit 1; \

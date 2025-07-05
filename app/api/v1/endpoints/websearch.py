@@ -1,7 +1,7 @@
 from aiocache import cached
 from fastapi import APIRouter
 
-from app.models.clinical_trial import WebSearchRequest
+from app.models.websearch import WebSearchRequest
 
 # from app.core.config import settings
 
