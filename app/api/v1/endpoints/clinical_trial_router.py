@@ -46,7 +46,9 @@ async def completion(request: ClinicalTrialRequest) -> Response:
         trial_results_text += f"  Brief Summary: {result.metadata.get('brief_summary', 'N/A')}\n\n"
 
     # Generate a summary with Gemma
-    summary_prompt = f"""Based on the following clinical trial results, provide a comprehensive answer to the user's original query. Synthesize the information from the different sources into a coherent response.
+    summary_prompt = f"""
+    Based on the following clinical trial results, provide a comprehensive answer to the user's original query. Synthesize the information from the different sources into a coherent response. 
+    The user wants a list of clinical trials, and for each trial, include the official title, NCT ID, and a brief summary. Also provide the conditions to be eligible for this trial, and if the patient satisfies them. 
 
 Original Query: {request.query}
 
