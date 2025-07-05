@@ -7,8 +7,4 @@ router = APIRouter()
 # Include all routers
 router.include_router(sync_router)
 router.include_router(clinical_trial_router)
-<<<<<<< HEAD
-router.include_router(websearch.router)
-=======
 router.include_router(websearch_router)
->>>>>>> 343c03e (refactor(api): Standardize websearch router import)
