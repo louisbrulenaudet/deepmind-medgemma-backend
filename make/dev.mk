@@ -37,3 +37,8 @@ upgrade: ## Update project dependencies
 
 pre-commit: ## Run pre-commit checks
 	pre-commit run --all-files
+
+deploy: ## Deploy the application
+	@echo "🚀 Deploying application..."
+	gcloud run deploy backend --cpu 8 --memory 32Gi
+

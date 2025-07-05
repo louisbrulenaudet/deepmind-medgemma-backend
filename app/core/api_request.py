@@ -38,7 +38,6 @@ async def api_request(
 
     async with httpx.AsyncClient() as client:
         try:
-            print(payload.dict(by_alias=True))
             res = await client.post(url, json=payload.dict(by_alias=True))
             res.raise_for_status()
             data = res.json()
