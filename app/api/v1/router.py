@@ -6,6 +6,7 @@ from app.api.v1.endpoints import (
     records_router,
     websearch_router,
     webscraper_router,
+    gemma_web_search_router,
 )
 
 router = APIRouter()
@@ -16,3 +17,4 @@ router.include_router(records_router)
 router.include_router(clinical_trial_router)
 router.include_router(websearch_router)
 router.include_router(webscraper_router)
+router.include_router(gemma_web_search_router)
