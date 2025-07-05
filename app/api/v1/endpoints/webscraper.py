@@ -17,8 +17,20 @@ async def webscraper(request: WebSearchRequest) -> dict:
         url = result.get("link")
         if url:
             scraped_content = await scrape_url(url)
-            result["scraped_content"] = scraped_content
+            if scraped_content:
+                result["scraped_content"] = scraped_content
 
     await asyncio.gather(*(scrape_and_add(result) for result in search_results))
 
-    return {"data": search_results}
+    # Filter out results without scraped content and format the output
+    filtered_results = [
+        {
+            "snippet": result.get("snippet"),
+            "link": result.get("link"),
+            "scraped_content": result.get("scraped_content"),
+        }
+        for result in search_results
+        if result.get("scraped_content")
+    ]
+
+    return {"data": filtered_results}
