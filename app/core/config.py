@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     """
     Configuration settings for the application, using Pydantic for validation.
     """
+    
 
     name: str = Field(default="JSON-ld", alias="APP_NAME")
     service_start_time: float = Field(default_factory=time.time, exclude=True)
@@ -20,6 +21,9 @@ class Settings(BaseSettings):
         alias="GOOGLE_API_BASE_URL",
     )
     google_api_default_method: str = "generateContent"
+    google_cloud_project: str = Field(
+        default="", alias="GOOGLE_CLOUD_PROJECT"
+    )
     google_default_model: str = "gemini-1.5-flash-latest"
     static_files_dir: str = Field(default="static", alias="STATIC_FILES_DIR")
 
