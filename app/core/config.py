@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     """
     Configuration settings for the application, using Pydantic for validation.
     """
-    
 
     name: str = Field(default="JSON-ld", alias="APP_NAME")
     service_start_time: float = Field(default_factory=time.time, exclude=True)

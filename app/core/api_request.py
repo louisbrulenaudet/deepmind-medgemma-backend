@@ -9,8 +9,11 @@ __all__ = [
 ]
 
 
+from app.models.gemini import GeminiPayload
+
+
 async def api_request(
-    payload: object, model: str | None = None, method: str | None = None
+    payload: GeminiPayload, model: str | None = None, method: str | None = None
 ) -> dict[str, Any]:
     response = {
         "status": "success",
@@ -35,7 +38,7 @@ async def api_request(
 
     async with httpx.AsyncClient() as client:
         try:
-            res = await client.post(url, json=payload)
+            res = await client.post(url, json=payload.dict())
             res.raise_for_status()
             data = res.json()
 

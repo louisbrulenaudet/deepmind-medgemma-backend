@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 
 class ChatInput(BaseModel):
-    medical_file: str
     conversation: list[dict[str, str]]
 
 

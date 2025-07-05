@@ -1,12 +1,13 @@
-import os
 import time
-
-from fastapi import APIRouter, HTTPException
-from starlette.responses import FileResponse, JSONResponse
+import json
+import logging
+from fastapi import APIRouter, HTTPException, Request
+from starlette.responses import JSONResponse
 
 from app.core.api_request import api_request
 from app.core.config import settings
 from app.models.main_chat import ChatInput, MultimodalInput
+from app.models.gemini import GeminiPayload, Content, Part
 
 router = APIRouter(tags=["sync"])
 
@@ -25,24 +26,12 @@ async def ping() -> dict:
     }
 
 
-@router.get("/{path:path}")
-async def send_static(path: str) -> FileResponse:
-    base_path = os.path.realpath(settings.static_files_dir)
-    full_path = os.path.realpath(os.path.join(base_path, path))
-    if not full_path.startswith(base_path + os.sep):
-        raise HTTPException(status_code=404, detail="File not found")
-    try:
-        return FileResponse(full_path)
-    except RuntimeError as e:
-        raise HTTPException(status_code=404, detail="File not found") from e
-
 
 @router.post("/chat")
-async def chat(input_data: ChatInput) -> JSONResponse:
-    previous_medical_file = input_data.medical_file
-
-    if previous_medical_file is None:
-        raise HTTPException(status_code=400, detail="No medical file provided")
+async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
+    logging.info(f"Received request with body: {await request.json()}")
+    with open("app/assets/patient.json", "r") as f:
+        previous_medical_file = json.load(f)
 
     conversation = input_data.conversation
     if not conversation or not isinstance(conversation, list):
@@ -68,7 +57,7 @@ Merci beaucoup.
 
 """
 
-    payload = {"contents": []}
+    contents = []
     first_user_message_appended = False
 
     for entry in conversation:
@@ -82,9 +71,9 @@ Merci beaucoup.
             text = introduction + text
             first_user_message_appended = True
 
-        payload["contents"].append({"role": sender, "parts": [{"text": text}]})
+        contents.append(Content(role=sender, parts=[Part(text=text)]))
 
-    api_response = await api_request(payload)
+    api_response = await api_request(GeminiPayload(contents=contents))
     return JSONResponse(content=api_response)
 
 
@@ -127,7 +116,7 @@ Formatez votre réponse uniquement avec d'éventuelles balises HTML, n'utilisez 
 
 Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
 
-    parts = [{"text": context + text_input}]
+    parts = [Part(text=context + text_input)]
 
     for file in uploaded_files:
         file_type = file.get("type", "")
@@ -142,8 +131,8 @@ Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
         if not file_type or not base64_data:
             continue
 
-        parts.append({"inline_data": {"mime_type": file_type, "data": base64_data}})
+        parts.append(Part(inline_data={"mime_type": file_type, "data": base64_data}))
 
-    payload = {"contents": [{"parts": parts}]}
+    payload = GeminiPayload(contents=[Content(role="user", parts=parts)])
     api_response = await api_request(payload)
     return JSONResponse(content=api_response)
