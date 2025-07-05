@@ -1076,6 +1076,7 @@ dependencies = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "python-dotenv" },
     { name = "sentence-transformers" },
     { name = "vertexai" },
 ]
@@ -1116,6 +1117,7 @@ requires-dist = [
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.5" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
     { name = "sentence-transformers", specifier = ">=5.0.0" },
     { name = "vertexai", specifier = ">=1.71.1" },
