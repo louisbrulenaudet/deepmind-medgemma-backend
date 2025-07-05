@@ -8,28 +8,18 @@ from app.core.api_request import api_request
 from app.core.config import settings
 from app.models.main_chat import ChatInput, MultimodalInput
 from app.models.gemma import GemmaPayload, Content, Part
+from app.core.llm_router import classify_request
+from app.api.v1.endpoints.websearch import websearch
+from app.api.v1.endpoints.clinical_trial_router import completion as clinical_trials
+from app.models.websearch import WebSearchRequest
+from app.models.clinical_trial import ClinicalTrialRequest
+
 
 router = APIRouter(tags=["sync"])
 
 
-@router.get("/ping", response_model=dict, tags=["Health"])
-async def ping() -> dict:
-    """
-    Health check endpoint for readiness/liveness probes.
-    """
-    now: int = int(time.time())
-    uptime: int = now - int(settings.service_start_time)
-    return {
-        "status": "ok",
-        "uptime": uptime,
-        "timestamp": now,
-    }
-
-
-
-@router.post("/chat")
-async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
-    logging.info(f"Received request with body: {await request.json()}")
+async def medgemma(input_data: ChatInput) -> JSONResponse:
+    logging.info(f"Routing to medgemma")
     with open("app/assets/patient.json", "r") as f:
         previous_medical_file = json.load(f)
 
@@ -71,10 +61,44 @@ Merci beaucoup.
             text = introduction + text
             first_user_message_appended = True
 
-        contents.append(Content(role=sender, parts=[Part(text=text)]))
+        contents.append(Content(role=sender, parts=[Part(text=text, inlineData=None)]))
 
     api_response = await api_request(GemmaPayload(contents=contents))
     return JSONResponse(content=api_response)
+
+
+@router.get("/ping", response_model=dict, tags=["Health"])
+async def ping() -> dict:
+    """
+    Health check endpoint for readiness/liveness probes.
+    """
+    now: int = int(time.time())
+    uptime: int = now - int(settings.service_start_time)
+    return {
+        "status": "ok",
+        "uptime": uptime,
+        "timestamp": now,
+    }
+
+
+
+@router.post("/chat")
+async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
+    logging.info(f"Received request with body: {await request.json()}")
+    
+    user_input = input_data.conversation[-1]["message"]
+    route = await classify_request(user_input)
+
+    if route == "medgemma":
+        return await medgemma(input_data)
+    elif route == "clinical_trials":
+        logging.info(f"Routing to clinical_trials")
+        return await clinical_trials(ClinicalTrialRequest(query=user_input))
+    elif route == "web_search":
+        logging.info(f"Routing to web_search")
+        return await websearch(WebSearchRequest(query=user_input))
+    else:
+        raise HTTPException(status_code=500, detail="Invalid route")
 
 
 @router.post("/multimodal")
@@ -116,7 +140,7 @@ Formatez votre réponse uniquement avec d'éventuelles balises HTML, n'utilisez 
 
 Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
 
-    parts = [Part(text=context + text_input)]
+    parts = [Part(text=context + text_input, inlineData=None)]
 
     for file in uploaded_files:
         file_type = file.get("type", "")
@@ -131,7 +155,7 @@ Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
         if not file_type or not base64_data:
             continue
 
-        parts.append(Part(inline_data={"mime_type": file_type, "data": base64_data}))
+        parts.append(Part(inlineData={"mime_type": file_type, "data": base64_data}))
 
     payload = GemmaPayload(contents=[Content(role="user", parts=parts)])
     api_response = await api_request(payload)
