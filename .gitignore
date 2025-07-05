@@ -209,3 +209,4 @@ __marimo__/
 # Chroma db files
 /chromadb/
 chromadb/
+chromadb/chroma.sqlite3
