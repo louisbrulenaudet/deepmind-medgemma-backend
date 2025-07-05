@@ -29,7 +29,10 @@ async def scrape_url(url: str) -> str:
         except httpx.RequestError as e:
             return f"An error occurred while requesting {e.request.url!r}: {e}"
 
-    soup = BeautifulSoup(response.text, "lxml")
+    parser = "lxml"
+    if "xml" in content_type:
+        parser = "lxml-xml"
+    soup = BeautifulSoup(response.text, parser)
     # Remove script and style elements
     for script_or_style in soup(["script", "style"]):
         script_or_style.decompose()

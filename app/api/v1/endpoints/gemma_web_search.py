@@ -35,7 +35,7 @@ async def gemma_web_search(request: GemmaWebSearchRequest) -> JSONResponse:
         contents=[
             Content(
                 role="user",
-                parts=[Part(text=gemma_prompt)]
+                parts=[Part(text=gemma_prompt, inlineData=None)]
             )
         ]
     )
