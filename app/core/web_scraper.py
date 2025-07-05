@@ -15,6 +15,12 @@ async def scrape_url(url: str) -> str:
         try:
             response = await client.get(url, follow_redirects=True)
             response.raise_for_status()
+            
+            # Check content type
+            content_type = response.headers.get("content-type")
+            if content_type and "text/html" not in content_type:
+                return ""  # Not an HTML page
+
         except httpx.HTTPStatusError as e:
             return f"HTTP error occurred: {e}"
         except httpx.RequestError as e:
@@ -33,4 +39,6 @@ async def scrape_url(url: str) -> str:
     chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
     # Drop blank lines
     text = "\n".join(chunk for chunk in chunks if chunk)
-    return text
+    
+    # Limit character count
+    return text[:1500]
