@@ -29,7 +29,7 @@ async def api_request(
 
     if model is None:
         model = settings.google_default_model
-        response["model"] = model
+    response["model"] = model
 
     if method is None:
         method = settings.google_api_default_method
@@ -38,7 +38,8 @@ async def api_request(
 
     async with httpx.AsyncClient() as client:
         try:
-            res = await client.post(url, json=payload.dict())
+            print(payload.dict(by_alias=True))
+            res = await client.post(url, json=payload.dict(by_alias=True))
             res.raise_for_status()
             data = res.json()
 

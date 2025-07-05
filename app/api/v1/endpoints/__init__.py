@@ -1,6 +1,6 @@
 from .chat import router as chat_router
 from .clinical_trial_router import router as clinical_trial_router
-from .records import router as records_router
+from .records import records_router
 from .websearch import router as websearch_router
 from .webscraper import router as webscraper_router
 
