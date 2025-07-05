@@ -11,9 +11,11 @@ charset-normalizer==3.4.2
 chromadb==1.0.15
 click==8.2.1
 coloredlogs==15.0.1
+coverage==7.9.2
 distro==1.9.0
 dnspython==2.7.0
 docstring-parser==0.16
+duckduckgo-search==8.0.5
 durationpy==0.10
 email-validator==2.2.0
 fastapi==0.115.14
@@ -45,12 +47,14 @@ humanfriendly==10.0
 idna==3.10
 importlib-metadata==8.7.0
 importlib-resources==6.5.2
+iniconfig==2.1.0
 jinja2==3.1.6
 jiter==0.10.0
 joblib==1.5.1
 jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
 kubernetes==33.1.0
+lxml==6.0.0
 markdown-it-py==3.0.0
 markupsafe==3.0.2
 mdurl==0.1.2
@@ -71,7 +75,10 @@ orjson==3.10.18
 overrides==7.7.0
 packaging==25.0
 pillow==11.3.0
+pluggy==1.6.0
+polars==1.31.0
 posthog==5.4.0
+primp==0.15.0
 proto-plus==1.26.1
 protobuf==5.29.5
 pyasn1==0.6.1
@@ -83,6 +90,9 @@ pydantic-settings==2.10.1
 pygments==2.19.2
 pypika==0.48.9
 pyproject-hooks==1.2.0
+pytest==8.4.1
+pytest-asyncio==1.0.0
+pytest-cov==6.2.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-multipart==0.0.20
