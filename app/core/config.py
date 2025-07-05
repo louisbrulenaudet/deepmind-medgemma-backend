@@ -23,7 +23,10 @@ class Settings(BaseSettings):
         alias="GOOGLE_API_BASE_URL",
     )
     google_api_default_method: str = "generateContent"
-    google_default_model: str = "gemini-1.5-flash-latest"
+    google_cloud_project: str = Field(
+        default="", alias="GOOGLE_CLOUD_PROJECT"
+    )
+    google_default_model: str = "gemma-3-27b-it"
     static_files_dir: str = Field(default="static", alias="STATIC_FILES_DIR")
     embedding_device: str = Field(default="cpu", alias="EMBEDDING_DEVICE")
     chroma_client: None = None
