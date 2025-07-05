@@ -1,7 +1,8 @@
 from aiocache import cached
 from fastapi import APIRouter
 
-from app.models.clinical_trial import WebSearchRequest
+from app.models.websearch import WebSearchRequest
+from app.utils.web_search import search
 
 # from app.core.config import settings
 
@@ -13,4 +14,5 @@ router = APIRouter(tags=["sync"])
 )
 @cached(ttl=60)
 async def websearch(request: WebSearchRequest) -> dict:
-    return {"data": "Placeholder for web search response"}
+    results = await search(request.query)
+    return {"data": results}

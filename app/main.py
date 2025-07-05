@@ -1,10 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.responses import JSONResponse
+from dotenv import load_dotenv
 
 from app._exceptions import CoreError
 from app.api.v1.router import router as api_router
 from app.core.config import settings
+
+load_dotenv()
 
 app = FastAPI(
     title=settings.name,
