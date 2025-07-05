@@ -14,5 +14,6 @@ router = APIRouter(tags=["sync"])
 )
 @cached(ttl=60)
 async def websearch(request: WebSearchRequest) -> dict:
+    print(request.query)
     results = await search(request.query)
     return {"data": results}

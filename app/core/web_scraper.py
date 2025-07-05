@@ -1,5 +1,8 @@
+import asyncio
 import httpx
 from bs4 import BeautifulSoup
+from app.utils.web_search import search
+
 
 async def scrape_url(url: str) -> str:
     """
@@ -42,3 +45,32 @@ async def scrape_url(url: str) -> str:
     
     # Limit character count
     return text[:1500]
+
+
+async def webscraper(query: str) -> dict:
+    """
+    Perform a web search and scrape the content of the search results.
+    """
+    search_results = await search(query)
+
+    async def scrape_and_add(result: dict):
+        url = result.get("link")
+        if url:
+            scraped_content = await scrape_url(url)
+            if scraped_content:
+                result["scraped_content"] = scraped_content
+
+    await asyncio.gather(*(scrape_and_add(result) for result in search_results))
+
+    # Filter out results without scraped content and format the output
+    filtered_results = [
+        {
+            "snippet": result.get("snippet"),
+            "link": result.get("link"),
+            "scraped_content": result.get("scraped_content"),
+        }
+        for result in search_results
+        if result.get("scraped_content")
+    ]
+
+    return {"data": filtered_results}
