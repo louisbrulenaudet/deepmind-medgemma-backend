@@ -47,7 +47,16 @@ async def process_scan(image_base64: str) -> dict:
                 status_code=500, detail=f"Gemini API error: {response['error_message']}"
             )
 
-        updated_patient_data_str = response["data"].strip()        
+        updated_patient_data_str = response["data"].strip()
+        
+        # Clean the response to ensure it's valid JSON
+        if updated_patient_data_str.startswith("```json"):
+            updated_patient_data_str = updated_patient_data_str[7:]
+        if updated_patient_data_str.endswith("```"):
+            updated_patient_data_str = updated_patient_data_str[:-3]
+        
+        updated_patient_data_str = updated_patient_data_str.strip()
+        
         try:
             updated_patient_data = json.loads(updated_patient_data_str)
         except json.JSONDecodeError:
