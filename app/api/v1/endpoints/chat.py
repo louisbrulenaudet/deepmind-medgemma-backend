@@ -27,9 +27,9 @@ async def ping() -> dict:
 
 @router.get("/{path:path}")
 async def send_static(path: str) -> FileResponse:
-    base_path = os.path.abspath(settings.static_files_dir)
-    full_path = os.path.abspath(os.path.normpath(os.path.join(base_path, path)))
-    if os.path.commonpath([base_path, full_path]) != base_path:
+    base_path = os.path.realpath(settings.static_files_dir)
+    full_path = os.path.realpath(os.path.join(base_path, path))
+    if not full_path.startswith(base_path + os.sep):
         raise HTTPException(status_code=404, detail="File not found")
     try:
         return FileResponse(full_path)
