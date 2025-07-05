@@ -1,5 +1,6 @@
 import httpx
-from fastapi import APIRouter, HTTPException, Request
+import json
+from fastapi import APIRouter, HTTPException, Request, Response
 from app.models.gemma import GemmaPayload, Content, Part
 from app.core.api_request import api_request
 from pydantic import BaseModel
@@ -12,7 +13,7 @@ class GemmaWebSearchRequest(BaseModel):
     context: str
 
 @router.post("/gemma-web-search")
-async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request) -> JSONResponse:
+async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request) -> Response:
     """
     Take a prompt and context, generate a search query with Gemma,
     and then call the /webscraper endpoint to perform a web search and scrape the results.
@@ -24,7 +25,7 @@ async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request
         contents=[
             Content(
                 role="user",
-                parts=[Part(text=gemma_prompt)]
+                parts=[Part(text=gemma_prompt, inlineData=None)]
             )
         ]
     )
@@ -50,12 +51,47 @@ async def gemma_web_search(request: GemmaWebSearchRequest, http_request: Request
             response.raise_for_status()
             webscraper_data = response.json()
             
-            # Add the search query to the final response
-            final_response = {
-                "search_query": search_query,
-                "data": webscraper_data.get("data", [])
-            }
-            return JSONResponse(content=final_response)
+            # Format the web scraper data for the LLM
+            search_results_text = ""
+            for i, result in enumerate(webscraper_data.get("data", [])):
+                search_results_text += f"Result {i+1}:\n"
+                search_results_text += f"  Link: {result.get('link', 'N/A')}\n"
+                search_results_text += f"  Snippet: {result.get('snippet', 'N/A')}\n\n"
+
+            # Generate a summary with Gemma
+            summary_prompt = f"""Based on the following web search results, provide a comprehensive answer to the user's original prompt. Synthesize the information from the different sources into a coherent response.
+
+Original Prompt: {request.prompt}
+Search Query: {search_query}
+
+Search Results:
+---
+{search_results_text}
+---
+
+Comprehensive Answer:
+"""
+
+            summary_payload = GemmaPayload(
+                contents=[
+                    Content(
+                        role="user",
+                        parts=[Part(text=summary_prompt, inlineData=None)]
+                    )
+                ]
+            )
+
+            summary_response = await api_request(summary_payload, model="gemini-1.5-flash")
+
+            if summary_response.get("status") == "success" and summary_response.get("data"):
+                return Response(content=summary_response["data"], media_type="text/plain")
+            else:
+                # Fallback to returning the JSON if summary fails
+                final_response = {
+                    "search_query": search_query,
+                    "data": webscraper_data.get("data", [])
+                }
+                return Response(content=json.dumps(final_response, indent=4), media_type="text/plain")
         except httpx.HTTPStatusError as e:
             raise HTTPException(status_code=e.response.status_code, detail=f"Error from webscraper service: {e.response.text}")
         except httpx.RequestError as e:

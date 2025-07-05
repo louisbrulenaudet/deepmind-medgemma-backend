@@ -2,7 +2,7 @@ import json
 import logging
 import time
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 from starlette.responses import JSONResponse
 
 from app.core.api_request import api_request
@@ -15,12 +15,13 @@ from app.api.v1.endpoints.gemma_web_search import gemma_web_search
 from app.api.v1.endpoints.clinical_trial_router import completion as clinical_trials
 from app.models.clinical_trial import ClinicalTrialRequest
 from app.api.v1.endpoints.gemma_web_search import GemmaWebSearchRequest
+from app.utils.chat_post_processing import format_chat_response
 
 
 router = APIRouter(tags=["sync"])
 
 
-async def medgemma(input_data: ChatInput) -> JSONResponse:
+async def medgemma(input_data: ChatInput) -> Response:
     logging.info(f"Routing to medgemma")
     with open("app/assets/patient.json", "r") as f:
         previous_medical_file = json.load(f)
@@ -66,7 +67,12 @@ Merci beaucoup.
         contents.append(Content(role=sender, parts=[Part(text=text, inlineData=None)]))
 
     api_response = await api_request(GemmaPayload(contents=contents))
-    return JSONResponse(content=api_response)
+    
+    if api_response and api_response.get("data"):
+        formatted_response = await format_chat_response(api_response["data"])
+        return Response(content=formatted_response, media_type="text/plain")
+    else:
+        raise HTTPException(status_code=500, detail="Failed to get response from LLM")
 
 
 @router.get("/ping", response_model=dict, tags=["Health"])
@@ -85,7 +91,7 @@ async def ping() -> dict:
 
 
 @router.post("/chat")
-async def chat(input_data: ChatInput, request: Request) -> JSONResponse:
+async def chat(input_data: ChatInput, request: Request):
     logging.info(f"Received request with body: {await request.json()}")
     
     user_input = input_data.conversation[-1]["message"]
