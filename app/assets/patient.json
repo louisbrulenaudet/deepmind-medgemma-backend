@@ -1,0 +1,52 @@
+{
+  "personal_information": {
+    "last_name": "DUPONT",
+    "first_name": "Paul",
+    "date_of_birth": "1995-07-04"
+  },
+  "medical_history": {
+    "conditions": [
+      "Arterial hypertension"
+    ],
+    "surgeries": [
+      {
+        "name": "Appendectomy",
+        "year": 2010
+      }
+    ]
+  },
+  "allergies": [
+    {
+      "substance": "Penicillin",
+      "reaction": "skin rash"
+    }
+  ],
+  "treatment": [
+    {
+      "medication": "Amlodipine",
+      "dosage": "5 mg",
+      "schedule": "in the morning"
+    }
+  ],
+  "lifestyle": {
+    "relationship_status": "In a relationship",
+    "children": false,
+    "living_alone": true,
+    "alcohol_tobacco_use": "None"
+  },
+  "lab_results": [
+    {
+      "date": "2024-02-15",
+      "sodium_mmol_per_L": 134,
+      "potassium_mmol_per_L": 4.4,
+      "creatinine_umol_per_L": 89
+    }
+  ],
+  "imaging": [
+    {
+      "date": "2025-04-14",
+      "type": "Chest CT scan",
+      "result": "normal"
+    }
+  ]
+}

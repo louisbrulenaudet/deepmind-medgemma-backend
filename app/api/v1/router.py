@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import clinical_trial_router, sync_router, websearch
+from app.api.v1.endpoints import clinical_trial_router, sync_router, websearch_router
 
 router = APIRouter()
 
