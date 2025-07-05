@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from app.core.api_request import api_request
 from app.core.config import settings
 from app.models.main_chat import ChatInput, MultimodalInput
-from app.models.gemini import GeminiPayload, Content, Part
+from app.models.gemma import GemmaPayload, Content, Part
 
 router = APIRouter(tags=["sync"])
 
@@ -73,7 +73,7 @@ Merci beaucoup.
 
         contents.append(Content(role=sender, parts=[Part(text=text)]))
 
-    api_response = await api_request(GeminiPayload(contents=contents))
+    api_response = await api_request(GemmaPayload(contents=contents))
     return JSONResponse(content=api_response)
 
 
@@ -133,6 +133,6 @@ Maintenant, voici ce que j'aimerais que vous ajoutiez ou modifiez :"""
 
         parts.append(Part(inline_data={"mime_type": file_type, "data": base64_data}))
 
-    payload = GeminiPayload(contents=[Content(role="user", parts=parts)])
+    payload = GemmaPayload(contents=[Content(role="user", parts=parts)])
     api_response = await api_request(payload)
     return JSONResponse(content=api_response)

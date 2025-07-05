@@ -9,11 +9,11 @@ __all__ = [
 ]
 
 
-from app.models.gemini import GeminiPayload
+from app.models.gemma import GemmaPayload
 
 
 async def api_request(
-    payload: GeminiPayload, model: str | None = None, method: str | None = None
+    payload: GemmaPayload, model: str | None = None, method: str | None = None
 ) -> dict[str, Any]:
     response = {
         "status": "success",

@@ -9,5 +9,5 @@ class Content(BaseModel):
     role: str
     parts: List[Part]
 
-class GeminiPayload(BaseModel):
+class GemmaPayload(BaseModel):
     contents: List[Content]
