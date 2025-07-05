@@ -34,6 +34,9 @@ async def completion(request: ClinicalTrialRequest) -> Response:
     retriever = ClinicalTrialRetriever()
     results = retriever(query=request.query, n_results=request.n_results)
     
+    if not results.results:
+        return Response(content="No clinical trials found for the given query.", media_type="text/plain")
+
     # Format the clinical trial data for the LLM
     trial_results_text = ""
     for i, result in enumerate(results.results):

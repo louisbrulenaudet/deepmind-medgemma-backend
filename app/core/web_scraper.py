@@ -1,22 +1,8 @@
+import asyncio
 import httpx
 from bs4 import BeautifulSoup
-from app.core.config import settings
+from app.utils.web_search import search
 
-async def search(query: str) -> list[dict]:
-    """
-    Search the web for a query.
-    """
-    url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        "key": settings.api_key,
-        "cx": settings.google_cse_id,
-        "q": query,
-        "num": 5,
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params)
-        response.raise_for_status()
-        return response.json().get("items", [])
 
 async def scrape_url(url: str) -> str:
     """
@@ -43,7 +29,10 @@ async def scrape_url(url: str) -> str:
         except httpx.RequestError as e:
             return f"An error occurred while requesting {e.request.url!r}: {e}"
 
-    soup = BeautifulSoup(response.text, "lxml")
+    parser = "lxml"
+    if "xml" in content_type:
+        parser = "lxml-xml"
+    soup = BeautifulSoup(response.text, parser)
     # Remove script and style elements
     for script_or_style in soup(["script", "style"]):
         script_or_style.decompose()
@@ -59,3 +48,32 @@ async def scrape_url(url: str) -> str:
     
     # Limit character count
     return text[:1500]
+
+
+async def webscraper(query: str) -> dict:
+    """
+    Perform a web search and scrape the content of the search results.
+    """
+    search_results = await search(query)
+
+    async def scrape_and_add(result: dict):
+        url = result.get("link")
+        if url:
+            scraped_content = await scrape_url(url)
+            if scraped_content:
+                result["scraped_content"] = scraped_content
+
+    await asyncio.gather(*(scrape_and_add(result) for result in search_results))
+
+    # Filter out results without scraped content and format the output
+    filtered_results = [
+        {
+            "snippet": result.get("snippet"),
+            "link": result.get("link"),
+            "scraped_content": result.get("scraped_content"),
+        }
+        for result in search_results
+        if result.get("scraped_content")
+    ]
+
+    return {"data": filtered_results}

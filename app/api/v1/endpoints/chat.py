@@ -101,13 +101,30 @@ async def chat(input_data: ChatInput, request: Request):
         return await medgemma(input_data)
     elif route == "clinical_trials":
         logging.info(f"Routing to clinical_trials")
-        return await clinical_trials(ClinicalTrialRequest(query=user_input))
+        response = await clinical_trials(ClinicalTrialRequest(query=user_input))
+        return Response(content=response.body, media_type="text/plain")
     elif route == "web_search":
         logging.info(f"Routing to web_search")
         # Extract context from the conversation
         context = " ".join([entry["message"] for entry in input_data.conversation[:-1]])
         gemma_request = GemmaWebSearchRequest(prompt=user_input, context=context)
-        return await gemma_web_search(gemma_request, request)
+        gemma_response = await gemma_web_search(gemma_request)
+        
+        # Convert JSON response to a string
+        response_content = json.loads(bytes(gemma_response.body))
+        
+        # Extract and format the relevant data
+        search_query = response_content.get("search_query", "N/A")
+        data = response_content.get("data", [])
+        
+        # Create a formatted string
+        formatted_string = f"Search Query: {search_query}\n\n"
+        for item in data:
+            formatted_string += f"Title: {item.get('title', 'N/A')}\n"
+            formatted_string += f"Link: {item.get('link', 'N/A')}\n"
+            formatted_string += f"Snippet: {item.get('snippet', 'N/A')}\n\n"
+            
+        return Response(content=formatted_string, media_type="text/plain")
     else:
         raise HTTPException(status_code=500, detail="Invalid route")
 
