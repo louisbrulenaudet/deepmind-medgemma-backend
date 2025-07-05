@@ -1,10 +1,23 @@
 import json
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from starlette.responses import JSONResponse
 
-router = APIRouter(tags=["sync"])
+from app.core.scan import process_scan
 
-@router.get("/records", response_model=dict, tags=["Records"])
+records_router = APIRouter(tags=["sync"])
+
+
+@records_router.post("/scan", response_model=dict, tags=["Records"])
+async def scan_record(request: Request) -> JSONResponse:
+    """
+    Scans an image, extracts text, and updates patient records.
+    """
+    image_base64 = (await request.body()).decode()
+    result = await process_scan(image_base64)
+    return JSONResponse(content=result)
+
+
+@records_router.get("/records", response_model=dict, tags=["Records"])
 async def get_records() -> JSONResponse:
     """
     Retrieve patient records.

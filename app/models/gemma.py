@@ -1,13 +1,24 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
+
 
 class Part(BaseModel):
-    text: Optional[str] = None
-    inline_data: Optional[Dict[str, Any]] = None
+    text: str | None = None
+    inline_data: dict[str, Any] | None = Field(None, alias="inlineData")
+
+    def dict(self, *args: object, **kwargs: object) -> dict[str, Any]:
+        kwargs.pop("exclude_none", None)
+        return super().dict(*args, exclude_none=True, **kwargs)
 
 class Content(BaseModel):
     role: str
-    parts: List[Part]
+    parts: list[Part]
+
 
 class GemmaPayload(BaseModel):
-    contents: List[Content]
+    contents: list[Content]
+
+    def dict(self, **kwargs: object) -> dict[str, Any]:
+        kwargs.update({"by_alias": True, "exclude_none": True})
+        return super().dict(**kwargs)

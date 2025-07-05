@@ -15,10 +15,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY ./pyproject.toml ./uv.lock /app/
 
 # Install dependencies
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev
 
 # Copy the project into the image
 COPY ./app /app/app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
